@@ -8,6 +8,8 @@ const app = express()
 
 const entries = []
 app.locals.entries = entries // i define my define my entries as a const and empty array. this is a placeholder for entries.(for the new-entry.ejs)
+let entryId = 1
+
 
 app.set("views", path.resolve(__dirname, "views"))
 app.set("view engine", "ejs")
@@ -26,12 +28,14 @@ app.post("/new-entry", (req, res) => {  // Added missing forward slash
         res.status(400).send("Entries must have a title and an information body.")
         return
     }
-    entries.push({
+    const newEntry = {
+        id: entryId++,
         title: req.body.title,
-        body: req.body.body,    // Fixed indentation
+        body: req.body.body,    
         published: new Date()
-    })
-    res.redirect("/")          // Moved inside the function block
+    }
+    entries.push(newEntry)
+    res.redirect("/")          
 })
 
 app.get("/edit-entry/:id", (req, res) => {
@@ -40,9 +44,8 @@ app.get("/edit-entry/:id", (req, res) => {
     if (!entry) {
         res.status(404).send("Entry not found!")
         return
-    } else {
-        res.render("edit-entry", { entry })
     }
+    res.render("edit-entry", { entry })
 })
 
 app.post("/edit-entry/:id", (req, res) => {
@@ -51,12 +54,17 @@ app.post("/edit-entry/:id", (req, res) => {
     if (!entry) {
         res.status(404).send("Entry not found!")
         return
-    } if (!req.body.title || !req.body.body) {
+    } 
+    if (!req.body.title || !req.body.body) {
         res.status(404).send("Both title and text body are required")
+        return
     }
+    
+    // Update existing entry
     entry.title = req.body.title
     entry.body = req.body.body
-    entry.published = new Date()
+    entry.lastEdited = new Date()
+    
     res.redirect("/")
 })
 
@@ -67,20 +75,14 @@ app.post("/delete-entry/:id", (req, res) => {
         res.status(404).send("Entry not found")
         return
     }
-    entries.splice(index,1)
+    entries.splice(index, 1)
     res.redirect("/")
 })
-
-
 
 app.use((req, res) => {
     res.status(404).render("404")
 })
 
-
-
-
 http.createServer(app).listen(3000, () => {
     console.log("Server started on port 3000")  // Added callback to know when server starts
 })
-
