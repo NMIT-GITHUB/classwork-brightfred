@@ -35,6 +35,13 @@ app.post("/new-entry", (req, res) => {  // Added missing forward slash
 })
 
 
+app.use((req,res)=>{
+    res.status(404).render("404")
+})
+
+
+
+
 http.createServer(app).listen(3000, () => {
     console.log("Server started on port 3000")  // Added callback to know when server starts
 })
